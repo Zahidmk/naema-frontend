@@ -448,7 +448,9 @@ export async function completeCheckoutFlowServer(
       body: JSON.stringify({ provider_id: paymentProvider }),
     });
     if (!pSessionRes.ok) {
-      throw new Error("Failed to initialize payment session context.");
+      const errText = await pSessionRes.text();
+      console.error("Payment session error response:", errText);
+      throw new Error(`Failed to initialize payment session context: ${errText}`);
     }
 
     const pSessionData = await pSessionRes.json();
