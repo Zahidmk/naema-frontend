@@ -346,7 +346,8 @@ export async function completeCheckoutFlowServer(
   cartId: string,
   email: string,
   shippingAddress: any,
-  billingAddress: any
+  billingAddress: any,
+  paymentProvider: string = "pp_system_default"
 ) {
   const token = (await cookies()).get("_medusa_jwt")?.value;
   const backendUrl = getBackendUrl();
@@ -363,8 +364,6 @@ export async function completeCheckoutFlowServer(
 
   try {
     // If customer is logged in, always use their authenticated email
-    // This prevents orders from being linked to wrong customer when
-    // user types a different email in the checkout form
     let checkoutEmail = email;
     if (token) {
       try {
@@ -406,7 +405,6 @@ export async function completeCheckoutFlowServer(
     const shippingOptsData = await shippingOptsRes.json();
     const shippingOpts = shippingOptsData.shipping_options || [];
     
-    // Filter options with valid amount
     const validOpts = shippingOpts.filter((o: any) => typeof o.amount === 'number');
     if (validOpts.length === 0) {
       throw new Error("No active shipping options available for the Kuwait region. Please contact support.");
@@ -425,7 +423,6 @@ export async function completeCheckoutFlowServer(
     }
 
     // 3. Initiate Payment Session
-    // We need to create payment collection first if missing
     const cartRetrieveRes = await fetch(`${backendUrl}/store/carts/${cartId}`, { headers });
     const cartRetrieveData = await cartRetrieveRes.json();
     const cartObj = cartRetrieveData.cart;
@@ -448,13 +445,28 @@ export async function completeCheckoutFlowServer(
     const pSessionRes = await fetch(`${backendUrl}/store/payment-collections/${pColId}/payment-sessions`, {
       method: "POST",
       headers,
-      body: JSON.stringify({ provider_id: "pp_system_default" }),
+      body: JSON.stringify({ provider_id: paymentProvider }),
     });
     if (!pSessionRes.ok) {
       throw new Error("Failed to initialize payment session context.");
     }
 
-    // 4. Complete Cart
+    const pSessionData = await pSessionRes.json();
+
+    // If using MyFatoorah, return the payment URL instead of completing
+    if (paymentProvider === "myfatoorah") {
+      const sessions = pSessionData.payment_collection?.payment_sessions || [];
+      // Find the created session
+      const session = sessions.find((s: any) => s.provider_id === "myfatoorah");
+      const paymentUrl = session?.data?.payment_url || session?.data?.paymentUrl;
+      
+      if (!paymentUrl) {
+        throw new Error("Failed to generate payment URL from provider.");
+      }
+      return { success: true, redirect_url: paymentUrl };
+    }
+
+    // 4. Complete Cart (for COD / pp_system_default)
     const completeRes = await fetch(`${backendUrl}/store/carts/${cartId}/complete`, {
       method: "POST",
       headers,

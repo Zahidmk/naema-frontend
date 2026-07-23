@@ -6,12 +6,13 @@ import Link from "next/link";
 
 import { IoMdCheckmark } from "react-icons/io";
 import { FiChevronDown, FiLock } from "react-icons/fi";
+import { useSearchParams } from "next/navigation";
 import { useCart } from "../../../context/CartContext";
 import { formatPrice } from "@/lib/types";
 import medusa from "@/lib/medusa";
 import { completeCheckoutFlowServer, getSavedAddresses } from "../../../actions";
 
-type PaymentMethod = "card" | "cod";
+type PaymentMethod = "myfatoorah" | "cod";
 
 const SectionHeading = ({
   number,
@@ -70,6 +71,7 @@ const PaymentOption = ({
 /* ------------------ CHECKOUT PAGE ------------------ */
 
 const CheckoutPage = () => {
+  const searchParams = useSearchParams();
   const { items, total, subtotal, cart, clearCart } = useCart();
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cod");
   const [discountCode, setDiscountCode] = useState("");
@@ -95,6 +97,8 @@ const CheckoutPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [placedOrder, setPlacedOrder] = useState<any>(null);
+
+  const orderIdParam = searchParams.get("order_id");
 
   // Auto-fill customer details and saved addresses if logged in
   useEffect(() => {
@@ -129,6 +133,12 @@ const CheckoutPage = () => {
     };
     fetchCustomer();
   }, []);
+
+  useEffect(() => {
+    if (orderIdParam) {
+      clearCart();
+    }
+  }, [orderIdParam, clearCart]);
 
   const handleSelectSavedAddress = (addr: any) => {
     setSelectedAddressId(addr.id);
@@ -197,11 +207,18 @@ const CheckoutPage = () => {
         email,
         shippingAddress,
         billingAddress,
+        paymentMethod === "myfatoorah" ? "myfatoorah" : "pp_system_default"
       );
 
-      if (completeRes.success && completeRes.order) {
-        setPlacedOrder(completeRes.order);
-        clearCart();
+      if (completeRes.success) {
+        if (completeRes.redirect_url) {
+          window.location.href = completeRes.redirect_url;
+          return;
+        }
+        if (completeRes.order) {
+          setPlacedOrder(completeRes.order);
+          clearCart();
+        }
       } else {
         throw new Error(
           completeRes.error || "Failed to place your order. Please try again.",
@@ -218,7 +235,7 @@ const CheckoutPage = () => {
   };
 
   // Success UI
-  if (placedOrder) {
+  if (placedOrder || orderIdParam) {
     return (
       <section className="min-h-screen bg-cream px-6 py-10 md:px-16 flex items-center justify-center">
         <div className="max-w-[600px] w-full bg-white border border-black/10 rounded-3xl p-8 md:p-12 shadow-sm text-center flex flex-col items-center gap-6">
@@ -236,12 +253,13 @@ const CheckoutPage = () => {
           <div className="w-full border-t border-b border-black/5 py-4 my-2 flex justify-between items-center text-sm">
             <span className="text-black/40">Order Reference</span>
             <span className="font-mono font-bold text-navy">
-              #{placedOrder.display_id}
+              #{placedOrder?.display_id || orderIdParam}
             </span>
           </div>
 
-          <div className="w-full text-left bg-cream/40 rounded-2xl p-6 flex flex-col gap-3 text-sm">
-            <p className="font-semibold text-black/80 mb-1">Shipping Details</p>
+          {(placedOrder?.shipping_address) && (
+            <div className="w-full text-left bg-cream/40 rounded-2xl p-6 flex flex-col gap-3 text-sm">
+              <p className="font-semibold text-black/80 mb-1">Shipping Details</p>
             <p className="text-black/60">
               {placedOrder.shipping_address?.first_name}{" "}
               {placedOrder.shipping_address?.last_name}
@@ -260,6 +278,7 @@ const CheckoutPage = () => {
               Phone: {placedOrder.shipping_address?.phone}
             </p>
           </div>
+          )}
 
           <Link
             href="/"
@@ -531,33 +550,16 @@ const CheckoutPage = () => {
                 />
 
                 <PaymentOption
-                  id="card"
-                  label="Credit / Debit Card"
+                  id="myfatoorah"
+                  label="Credit / Debit Card (MyFatoorah)"
                   description="Visa, Mastercard, KNET cards accepted"
                   icon="💳"
-                  selected={paymentMethod === "card"}
-                  onSelect={() => setPaymentMethod("card")}
+                  selected={paymentMethod === "myfatoorah"}
+                  onSelect={() => setPaymentMethod("myfatoorah")}
                 />
-                {paymentMethod === "card" && (
-                  <div className="ml-4 pl-4 border-l-2 border-gold/40 flex flex-col gap-3 pb-2 pt-2">
-                    <input
-                      placeholder="Card number"
-                      className="w-full border border-black/20 rounded-xl px-4 py-3 text-sm outline-none focus:border-gold transition-colors bg-white placeholder:text-black/30"
-                    />
-                    <div className="flex gap-3">
-                      <input
-                        placeholder="MM / YY"
-                        className="w-full border border-black/20 rounded-xl px-4 py-3 text-sm outline-none focus:border-gold transition-colors bg-white placeholder:text-black/30"
-                      />
-                      <input
-                        placeholder="CVV"
-                        className="w-full border border-black/20 rounded-xl px-4 py-3 text-sm outline-none focus:border-gold transition-colors bg-white placeholder:text-black/30"
-                      />
-                    </div>
-                    <input
-                      placeholder="Name on card"
-                      className="w-full border border-black/20 rounded-xl px-4 py-3 text-sm outline-none focus:border-gold transition-colors bg-white placeholder:text-black/30"
-                    />
+                {paymentMethod === "myfatoorah" && (
+                  <div className="ml-4 pl-4 border-l-2 border-gold/40 flex flex-col gap-3 pb-2 pt-2 text-sm text-black/60">
+                    You will be redirected securely to the MyFatoorah payment gateway to complete your purchase.
                   </div>
                 )}
               </div>
