@@ -441,11 +441,15 @@ export async function completeCheckoutFlowServer(
       throw new Error("Failed to configure payment collection context.");
     }
 
+    const targetProviderId = (paymentProvider === "myfatoorah" || paymentProvider === "pp_myfatoorah_myfatoorah")
+      ? "pp_myfatoorah_myfatoorah"
+      : paymentProvider;
+
     // Create payment session
     const pSessionRes = await fetch(`${backendUrl}/store/payment-collections/${pColId}/payment-sessions`, {
       method: "POST",
       headers,
-      body: JSON.stringify({ provider_id: paymentProvider }),
+      body: JSON.stringify({ provider_id: targetProviderId }),
     });
     if (!pSessionRes.ok) {
       const errText = await pSessionRes.text();
@@ -456,10 +460,10 @@ export async function completeCheckoutFlowServer(
     const pSessionData = await pSessionRes.json();
 
     // If using MyFatoorah, return the payment URL instead of completing
-    if (paymentProvider === "myfatoorah") {
+    if (targetProviderId.includes("myfatoorah")) {
       const sessions = pSessionData.payment_collection?.payment_sessions || [];
       // Find the created session
-      const session = sessions.find((s: any) => s.provider_id === "myfatoorah");
+      const session = sessions.find((s: any) => s.provider_id?.includes("myfatoorah"));
       const paymentUrl = session?.data?.payment_url || session?.data?.paymentUrl;
       
       if (!paymentUrl) {

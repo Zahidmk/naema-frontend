@@ -207,7 +207,7 @@ const CheckoutPage = () => {
         email,
         shippingAddress,
         billingAddress,
-        paymentMethod === "myfatoorah" ? "myfatoorah" : "pp_system_default"
+        paymentMethod === "myfatoorah" ? "pp_myfatoorah_myfatoorah" : "pp_system_default"
       );
 
       if (completeRes.success) {
