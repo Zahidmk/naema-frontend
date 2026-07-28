@@ -11,7 +11,7 @@ export async function getRegionId(): Promise<string | undefined> {
     const res = await medusa.store.region.list({ limit: 1 });
     if (res.regions && res.regions.length > 0 && res.regions[0]?.id) {
       cachedRegionId = res.regions[0].id;
-      return cachedRegionId;
+      return cachedRegionId ?? undefined;
     }
   } catch (err) {
     console.error("Failed to auto-fetch region from backend:", err);
