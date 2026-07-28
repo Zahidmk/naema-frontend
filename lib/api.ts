@@ -3,7 +3,21 @@ import type { MedusaProduct, MedusaProductCategory, MedusaCart } from "./types";
 
 // ─── Products ─────────────────────────────────────────────────────────────
 
-const KUWAIT_REGION_ID = process.env.NEXT_PUBLIC_KUWAIT_REGION_ID || "reg_01KY8YRQQNTF625JHN62Z3R9CK";
+let cachedRegionId: string | null = process.env.NEXT_PUBLIC_KUWAIT_REGION_ID || null;
+
+export async function getRegionId(): Promise<string | undefined> {
+  if (cachedRegionId) return cachedRegionId;
+  try {
+    const res = await medusa.store.region.list({ limit: 1 });
+    if (res.regions && res.regions.length > 0 && res.regions[0]?.id) {
+      cachedRegionId = res.regions[0].id;
+      return cachedRegionId;
+    }
+  } catch (err) {
+    console.error("Failed to auto-fetch region from backend:", err);
+  }
+  return process.env.NEXT_PUBLIC_KUWAIT_REGION_ID || undefined;
+}
 
 export async function getProducts(options?: {
   limit?: number;
@@ -14,13 +28,14 @@ export async function getProducts(options?: {
   q?: string;
 }): Promise<{ products: MedusaProduct[]; count: number }> {
   try {
+    const region_id = await getRegionId();
     const params: Record<string, unknown> = {
       limit: options?.limit ?? 50,
       offset: options?.offset ?? 0,
       category_id: options?.category_id,
       collection_id: options?.collection_id,
       order: options?.order,
-      region_id: KUWAIT_REGION_ID,
+      region_id,
       fields: "+variants.calculated_price,+variants.prices,+images,+categories,+tags,+collection,+metadata",
     };
     if (options?.q) params.q = options.q;
@@ -48,9 +63,10 @@ export async function getProducts(options?: {
 
 export async function getProductByHandle(handle: string): Promise<MedusaProduct | null> {
   try {
+    const region_id = await getRegionId();
     const res = await medusa.store.product.list({
       handle,
-      region_id: KUWAIT_REGION_ID,
+      region_id,
       fields: "+variants.calculated_price,+variants.prices,+images,+categories,+tags,+collection,+metadata",
       limit: 1,
     });
@@ -120,8 +136,9 @@ export async function getCategoryByHandle(handle: string): Promise<MedusaProduct
 
 export async function createCart(): Promise<MedusaCart | null> {
   try {
+    const region_id = await getRegionId();
     const res = await medusa.store.cart.create({
-      region_id: KUWAIT_REGION_ID,
+      region_id: region_id || undefined,
     });
     return (res.cart ?? null) as unknown as MedusaCart | null;
   } catch (err) {
