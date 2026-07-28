@@ -142,20 +142,10 @@ export type MedusaPaymentSession = {
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
 export function formatPrice(amount: number, currencyCode: string = "kwd"): string {
-  const code = currencyCode.toLowerCase();
   const num = Number(amount) || 0;
-  // Canonical format: DB stores in smallest units (Fils for KWD/BHD/OMR, cents for USD/EUR/INR)
-  if (code === "kwd") {
-    return `KD ${(num / 1000).toFixed(3)}`;
-  }
-  if (code === "bhd" || code === "omr") {
-    return `${(num / 1000).toFixed(3)} ${currencyCode.toUpperCase()}`;
-  }
-  if (code === "inr") {
-    return `₹${(num / 100).toLocaleString()}`;
-  }
-  // Default: cents
-  return `${(num / 100).toFixed(2)} ${currencyCode.toUpperCase()}`;
+  // Handle both standard KWD amounts (e.g., 2.5, 3) and sub-unit amounts in fils (e.g., 2500, 3000)
+  const val = num >= 100 ? num / 1000 : num;
+  return `KD ${val.toFixed(3)}`;
 }
 
 export function getLowestPrice(variant: MedusaProductVariant | null | undefined): number | null {
