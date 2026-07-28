@@ -445,11 +445,17 @@ export async function completeCheckoutFlowServer(
       ? "pp_myfatoorah_myfatoorah"
       : paymentProvider;
 
-    // Create payment session
+    // Create payment session with explicit cart_id context
     const pSessionRes = await fetch(`${backendUrl}/store/payment-collections/${pColId}/payment-sessions`, {
       method: "POST",
       headers,
-      body: JSON.stringify({ provider_id: targetProviderId }),
+      body: JSON.stringify({ 
+        provider_id: targetProviderId,
+        context: {
+          cart_id: cartId,
+          resource_id: cartId,
+        }
+      }),
     });
     if (!pSessionRes.ok) {
       const errText = await pSessionRes.text();
