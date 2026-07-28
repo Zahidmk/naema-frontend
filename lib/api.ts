@@ -86,8 +86,9 @@ export async function getProductByHandle(handle: string): Promise<MedusaProduct 
 
 export async function getProductById(id: string): Promise<MedusaProduct | null> {
   try {
+    const region_id = await getRegionId();
     const res = await medusa.store.product.retrieve(id, {
-      region_id: KUWAIT_REGION_ID,
+      region_id,
       fields: "+variants.calculated_price,+variants.prices,+images,+categories,+tags,+collection,+metadata",
     });
     const product = (res.product ?? null) as unknown as MedusaProduct | null;
