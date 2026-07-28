@@ -27,7 +27,7 @@ export async function login(formData: FormData) {
   }
 
   const backendUrl = getBackendUrl();
-  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_773489df7bbb4070ad9616e88b9e4b6398fdeb1e1ddce1cecebb2e9aad832cd9";
+  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_baf9e9b064f89c5d67677df70e5d2df3b306985a8dc7156f55af008ad66657c4";
 
   try {
     const res = await fetch(`${backendUrl}/auth/customer/emailpass`, {
@@ -64,7 +64,7 @@ export async function login(formData: FormData) {
 export async function requestPasswordReset(email: string) {
   if (!email) return { error: "Email is required." };
   const backendUrl = getBackendUrl();
-  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_773489df7bbb4070ad9616e88b9e4b6398fdeb1e1ddce1cecebb2e9aad832cd9";
+  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_baf9e9b064f89c5d67677df70e5d2df3b306985a8dc7156f55af008ad66657c4";
 
   try {
     const res = await fetch(`${backendUrl}/auth/customer/emailpass/reset-password`, {
@@ -91,7 +91,7 @@ export async function requestPasswordReset(email: string) {
 export async function resetPassword(password: string, token: string) {
   if (!password || !token) return { error: "Password and token are required." };
   const backendUrl = getBackendUrl();
-  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_773489df7bbb4070ad9616e88b9e4b6398fdeb1e1ddce1cecebb2e9aad832cd9";
+  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_baf9e9b064f89c5d67677df70e5d2df3b306985a8dc7156f55af008ad66657c4";
 
   try {
     const res = await fetch(`${backendUrl}/auth/customer/emailpass/update`, {
@@ -126,7 +126,7 @@ export async function signup(formData: FormData) {
   }
 
   const backendUrl = getBackendUrl();
-  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_773489df7bbb4070ad9616e88b9e4b6398fdeb1e1ddce1cecebb2e9aad832cd9";
+  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_baf9e9b064f89c5d67677df70e5d2df3b306985a8dc7156f55af008ad66657c4";
 
   try {
     // 1. Register Auth Identity
@@ -178,7 +178,7 @@ export async function getCurrentCustomer() {
   if (!token) return { customer: null };
 
   const backendUrl = getBackendUrl();
-  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_773489df7bbb4070ad9616e88b9e4b6398fdeb1e1ddce1cecebb2e9aad832cd9";
+  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_baf9e9b064f89c5d67677df70e5d2df3b306985a8dc7156f55af008ad66657c4";
 
   try {
     const res = await fetch(`${backendUrl}/store/customers/me`, {
@@ -211,7 +211,7 @@ export async function getSavedAddresses() {
   if (!token) return { addresses: [], customer: null };
 
   const backendUrl = getBackendUrl();
-  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_773489df7bbb4070ad9616e88b9e4b6398fdeb1e1ddce1cecebb2e9aad832cd9";
+  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_baf9e9b064f89c5d67677df70e5d2df3b306985a8dc7156f55af008ad66657c4";
 
   try {
     const res = await fetch(`${backendUrl}/store/customers/me?fields=*addresses`, {
@@ -239,7 +239,7 @@ export async function getCustomerOrders() {
   if (!token) return { orders: [] };
 
   const backendUrl = getBackendUrl();
-  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_773489df7bbb4070ad9616e88b9e4b6398fdeb1e1ddce1cecebb2e9aad832cd9";
+  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_baf9e9b064f89c5d67677df70e5d2df3b306985a8dc7156f55af008ad66657c4";
 
   try {
     const res = await fetch(`${backendUrl}/store/orders?fields=id,display_id,status,fulfillment_status,payment_status,created_at,subtotal,shipping_total,tax_total,total,currency_code,items.*,shipping_address.*,billing_address.*`, {
@@ -264,7 +264,7 @@ export async function getCustomerOrders() {
 
 export async function getProductReviews(productId: string) {
   const backendUrl = getBackendUrl();
-  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_773489df7bbb4070ad9616e88b9e4b6398fdeb1e1ddce1cecebb2e9aad832cd9";
+  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_baf9e9b064f89c5d67677df70e5d2df3b306985a8dc7156f55af008ad66657c4";
 
   try {
     const res = await fetch(`${backendUrl}/store/products/${productId}/reviews`, {
@@ -291,7 +291,7 @@ export async function createProductReview(
   customerName?: string
 ) {
   const backendUrl = getBackendUrl();
-  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_773489df7bbb4070ad9616e88b9e4b6398fdeb1e1ddce1cecebb2e9aad832cd9";
+  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_baf9e9b064f89c5d67677df70e5d2df3b306985a8dc7156f55af008ad66657c4";
 
   try {
     const res = await fetch(`${backendUrl}/store/products/${productId}/reviews`, {
@@ -319,7 +319,7 @@ export async function cancelCustomerOrder(orderId: string) {
   if (!token) return { error: "Unauthorized: not logged in" };
 
   const backendUrl = getBackendUrl();
-  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_773489df7bbb4070ad9616e88b9e4b6398fdeb1e1ddce1cecebb2e9aad832cd9";
+  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_baf9e9b064f89c5d67677df70e5d2df3b306985a8dc7156f55af008ad66657c4";
 
   try {
     const res = await fetch(`${backendUrl}/store/orders/${orderId}/cancel`, {
@@ -351,7 +351,7 @@ export async function completeCheckoutFlowServer(
 ) {
   const token = (await cookies()).get("_medusa_jwt")?.value;
   const backendUrl = getBackendUrl();
-  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_773489df7bbb4070ad9616e88b9e4b6398fdeb1e1ddce1cecebb2e9aad832cd9";
+  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_baf9e9b064f89c5d67677df70e5d2df3b306985a8dc7156f55af008ad66657c4";
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -546,7 +546,7 @@ export async function updateCustomerDetails(data: { first_name?: string; last_na
   if (!token) return { error: "Unauthorized" };
 
   const backendUrl = getBackendUrl();
-  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_773489df7bbb4070ad9616e88b9e4b6398fdeb1e1ddce1cecebb2e9aad832cd9";
+  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_baf9e9b064f89c5d67677df70e5d2df3b306985a8dc7156f55af008ad66657c4";
 
   try {
     const res = await fetch(`${backendUrl}/store/customers/me`, {
@@ -585,7 +585,7 @@ export async function addCustomerAddress(addressData: {
   if (!token) return { error: "Unauthorized" };
 
   const backendUrl = getBackendUrl();
-  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_773489df7bbb4070ad9616e88b9e4b6398fdeb1e1ddce1cecebb2e9aad832cd9";
+  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_baf9e9b064f89c5d67677df70e5d2df3b306985a8dc7156f55af008ad66657c4";
 
   try {
     const res = await fetch(`${backendUrl}/store/customers/me/addresses`, {
@@ -614,7 +614,7 @@ export async function deleteCustomerAddress(addressId: string) {
   if (!token) return { error: "Unauthorized" };
 
   const backendUrl = getBackendUrl();
-  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_773489df7bbb4070ad9616e88b9e4b6398fdeb1e1ddce1cecebb2e9aad832cd9";
+  const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_baf9e9b064f89c5d67677df70e5d2df3b306985a8dc7156f55af008ad66657c4";
 
   try {
     const res = await fetch(`${backendUrl}/store/customers/me/addresses/${addressId}`, {

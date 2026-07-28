@@ -3,7 +3,7 @@ import type { MedusaProduct, MedusaProductCategory, MedusaCart } from "./types";
 
 // ─── Products ─────────────────────────────────────────────────────────────
 
-const KUWAIT_REGION_ID = process.env.NEXT_PUBLIC_KUWAIT_REGION_ID || "reg_01KRK1KY4AJAE7SECNRDMJN2S2";
+const KUWAIT_REGION_ID = process.env.NEXT_PUBLIC_KUWAIT_REGION_ID || "reg_01KY8YRQQNTF625JHN62Z3R9CK";
 
 export async function getProducts(options?: {
   limit?: number;

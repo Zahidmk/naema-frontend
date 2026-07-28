@@ -143,31 +143,27 @@ export type MedusaPaymentSession = {
 
 export function formatPrice(amount: number, currencyCode: string = "kwd"): string {
   const code = currencyCode.toLowerCase();
-  // Medusa stores amounts in smallest unit (fils for KWD, cents for others)
+  const num = Number(amount) || 0;
+  // Canonical format: DB stores in smallest units (Fils for KWD/BHD/OMR, cents for USD/EUR/INR)
   if (code === "kwd") {
-    return `KD ${(amount / 1000).toFixed(3)}`;
+    return `KD ${(num / 1000).toFixed(3)}`;
   }
   if (code === "bhd" || code === "omr") {
-    return `${(amount / 1000).toFixed(3)} ${currencyCode.toUpperCase()}`;
+    return `${(num / 1000).toFixed(3)} ${currencyCode.toUpperCase()}`;
   }
   if (code === "inr") {
-    return `₹${(amount / 100).toLocaleString()}`;
+    return `₹${(num / 100).toLocaleString()}`;
   }
-  // Default: assume cents
-  return `${(amount / 100).toFixed(2)} ${currencyCode.toUpperCase()}`;
+  // Default: cents
+  return `${(num / 100).toFixed(2)} ${currencyCode.toUpperCase()}`;
 }
 
 export function getLowestPrice(variant: MedusaProductVariant | null | undefined): number | null {
   if (!variant) return null;
   
-  // First try calculated_price (region-aware, comes from API with region_id)
+  // First try calculated_price (comes from API with region_id)
   if (variant.calculated_price) {
-    if (variant.calculated_price.raw_calculated_amount?.value != null) {
-      // raw values are in real currency units (e.g. 5.0 KWD), convert to fils
-      return Number(variant.calculated_price.raw_calculated_amount.value) * 1000;
-    }
     if (variant.calculated_price.calculated_amount != null) {
-      // calculated_amount is already in smallest unit (fils)
       return variant.calculated_price.calculated_amount;
     }
   }
@@ -175,18 +171,14 @@ export function getLowestPrice(variant: MedusaProductVariant | null | undefined)
   // Fall back to KWD price from prices array
   if (variant.prices && variant.prices.length > 0) {
     const kwdPrice = variant.prices.find((p) => p?.currency_code === "kwd");
-    if (kwdPrice) {
-      if (kwdPrice.raw_amount?.value != null) {
-        // raw_amount.value is in real currency units, convert to fils
-        return Number(kwdPrice.raw_amount.value) * 1000;
-      }
-      if (kwdPrice.amount != null) return kwdPrice.amount; // already in fils
+    if (kwdPrice && kwdPrice.amount != null) {
+      return kwdPrice.amount;
     }
     
     // Get minimum price from any currency
     const validPrices = variant.prices
-      .filter((p) => p && (p.raw_amount?.value != null || p.amount != null))
-      .map((p) => p.raw_amount?.value != null ? Number(p.raw_amount.value) * 1000 : p.amount);
+      .filter((p) => p && p.amount != null)
+      .map((p) => p.amount);
     if (validPrices.length > 0) {
       return Math.min(...validPrices);
     }

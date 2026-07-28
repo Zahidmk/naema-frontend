@@ -54,7 +54,7 @@ const LoginPage = () => {
             setError(null);
             try {
               const backendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL;
-              const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_ed2e2b7b35796dd735f8ca890ae87375a50d3e5ac2076922d317b3a52cb76042";
+              const publishableKey = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "pk_baf9e9b064f89c5d67677df70e5d2df3b306985a8dc7156f55af008ad66657c4";
               
               const res = await fetch(`${backendUrl}/store/auth/google/token`, {
                 method: "POST",

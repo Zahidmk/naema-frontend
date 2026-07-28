@@ -16,8 +16,12 @@ const CategoryProductPage = async ({
 }) => {
   const { category } = await params; // ✅ FIX
 
-  const label = categoryMap[category];
-  if (!label) return notFound();
+  const label =
+    categoryMap[category] ||
+    category
+      .split("-")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
 
   return <ProductListing category={category} label={label} />;
 };
