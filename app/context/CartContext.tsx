@@ -140,8 +140,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const items = cart?.items ?? [];
-  const total = cart?.total ?? 0;
-  const subtotal = cart?.subtotal ?? 0;
+  const calculatedSubtotal = items.reduce(
+    (sum, i) => sum + (i.unit_price ?? 0) * i.quantity,
+    0
+  );
+  const subtotal = calculatedSubtotal > 0 ? calculatedSubtotal : (cart?.subtotal ?? 0);
+  const total = subtotal;
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
