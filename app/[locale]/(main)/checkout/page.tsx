@@ -151,7 +151,11 @@ const CheckoutPage = () => {
       if (grandTotal <= 0) return;
       try {
         const backendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://127.0.0.1:9000";
-        const res = await fetch(`${backendUrl}/store/payment/myfatoorah/methods?amount=${grandTotal}&currency=KWD`);
+        const res = await fetch(`${backendUrl}/store/payment/myfatoorah/methods?amount=${grandTotal}&currency=KWD`, {
+          headers: {
+            "x-publishable-api-key": process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+          }
+        });
         if (res.ok) {
           const data = await res.json();
           setFatoorahMethods(data.methods || []);
