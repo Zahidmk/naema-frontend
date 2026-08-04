@@ -12,7 +12,7 @@ import { formatPrice } from "@/lib/types";
 import medusa from "@/lib/medusa";
 import { completeCheckoutFlowServer, getSavedAddresses } from "../../../actions";
 
-type PaymentMethod = "myfatoorah" | "cod";
+type PaymentMethod = string;
 
 const SectionHeading = ({
   number,
@@ -37,7 +37,7 @@ const PaymentOption = ({
   selected,
   onSelect,
 }: {
-  id: PaymentMethod;
+  id: string;
   label: string;
   description: string;
   icon: React.ReactNode;
@@ -134,11 +134,34 @@ const CheckoutPage = () => {
     fetchCustomer();
   }, []);
 
+  const [fatoorahMethods, setFatoorahMethods] = useState<any[]>([]);
+
   useEffect(() => {
     if (orderIdParam) {
       clearCart();
     }
   }, [orderIdParam, clearCart]);
+
+  const shippingTotal = cart?.shipping_total || (subtotal > 15 ? 0 : 1.5);
+  const discountTotal = cart?.discount_total || (discountApplied ? Math.round(subtotal * 0.1 * 1000) / 1000 : 0);
+  const grandTotal = subtotal + shippingTotal - discountTotal;
+
+  useEffect(() => {
+    const fetchMethods = async () => {
+      if (grandTotal <= 0) return;
+      try {
+        const backendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://127.0.0.1:9000";
+        const res = await fetch(`${backendUrl}/store/payment/myfatoorah/methods?amount=${grandTotal}&currency=KWD`);
+        if (res.ok) {
+          const data = await res.json();
+          setFatoorahMethods(data.methods || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch MyFatoorah methods", err);
+      }
+    };
+    fetchMethods();
+  }, [grandTotal]);
 
   const handleSelectSavedAddress = (addr: any) => {
     setSelectedAddressId(addr.id);
@@ -152,11 +175,7 @@ const CheckoutPage = () => {
     setPhone(addr.phone || phone);
   };
 
-  const shippingTotal =
-    cart?.shipping_total || (subtotal > 15 ? 0 : 1.5);
-  const discountTotal =
-    cart?.discount_total || (discountApplied ? Math.round(subtotal * 0.1 * 1000) / 1000 : 0);
-  const grandTotal = subtotal + shippingTotal - discountTotal;
+
 
   const handleApplyDiscount = () => {
     if (discountCode.toLowerCase() === "naema10") setDiscountApplied(true);
@@ -201,13 +220,17 @@ const CheckoutPage = () => {
         postal_code: postalCode,
       };
 
+      const provider = paymentMethod === "cod" ? "pp_system_default" : "pp_myfatoorah_myfatoorah";
+      const methodId = (paymentMethod === "cod" || paymentMethod === "myfatoorah") ? undefined : Number(paymentMethod);
+
       // Call the Server Action to safely perform checkout under the active customer session
       const completeRes = await completeCheckoutFlowServer(
         cart.id,
         email,
         shippingAddress,
         billingAddress,
-        paymentMethod === "myfatoorah" ? "pp_myfatoorah_myfatoorah" : "pp_system_default"
+        provider,
+        methodId
       );
 
       if (completeRes.success) {
@@ -549,18 +572,40 @@ const CheckoutPage = () => {
                   onSelect={() => setPaymentMethod("cod")}
                 />
 
-                <PaymentOption
-                  id="myfatoorah"
-                  label="Credit / Debit Card (MyFatoorah)"
-                  description="Visa, Mastercard, KNET cards accepted"
-                  icon="💳"
-                  selected={paymentMethod === "myfatoorah"}
-                  onSelect={() => setPaymentMethod("myfatoorah")}
-                />
-                {paymentMethod === "myfatoorah" && (
-                  <div className="ml-4 pl-4 border-l-2 border-gold/40 flex flex-col gap-3 pb-2 pt-2 text-sm text-black/60">
-                    You will be redirected securely to the MyFatoorah payment gateway to complete your purchase.
-                  </div>
+                {fatoorahMethods.length > 0 ? (
+                  fatoorahMethods.map((method) => (
+                    <div key={method.PaymentMethodId}>
+                      <PaymentOption
+                        id={method.PaymentMethodId.toString()}
+                        label={method.PaymentMethodEn}
+                        description="Secure payment via MyFatoorah"
+                        icon={method.ImageUrl ? <img src={method.ImageUrl} alt={method.PaymentMethodEn} className="h-6 w-auto object-contain" /> : "💳"}
+                        selected={paymentMethod === method.PaymentMethodId.toString()}
+                        onSelect={() => setPaymentMethod(method.PaymentMethodId.toString())}
+                      />
+                      {paymentMethod === method.PaymentMethodId.toString() && (
+                        <div className="ml-4 pl-4 border-l-2 border-gold/40 flex flex-col gap-3 pb-2 pt-2 text-sm text-black/60">
+                          You will be redirected securely to the MyFatoorah gateway to complete your {method.PaymentMethodEn} payment.
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <PaymentOption
+                      id="myfatoorah"
+                      label="Credit / Debit Card (MyFatoorah)"
+                      description="Visa, Mastercard, KNET cards accepted"
+                      icon="💳"
+                      selected={paymentMethod === "myfatoorah"}
+                      onSelect={() => setPaymentMethod("myfatoorah")}
+                    />
+                    {paymentMethod === "myfatoorah" && (
+                      <div className="ml-4 pl-4 border-l-2 border-gold/40 flex flex-col gap-3 pb-2 pt-2 text-sm text-black/60">
+                        You will be redirected securely to the MyFatoorah payment gateway to complete your purchase.
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>

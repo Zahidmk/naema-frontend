@@ -347,7 +347,8 @@ export async function completeCheckoutFlowServer(
   email: string,
   shippingAddress: any,
   billingAddress: any,
-  paymentProvider: string = "pp_system_default"
+  paymentProvider: string = "pp_system_default",
+  paymentMethodId?: number
 ) {
   const token = (await cookies()).get("_medusa_jwt")?.value;
   const backendUrl = getBackendUrl();
@@ -451,6 +452,7 @@ export async function completeCheckoutFlowServer(
       headers,
       body: JSON.stringify({ 
         provider_id: targetProviderId,
+        data: paymentMethodId ? { payment_method_id: paymentMethodId } : undefined,
       }),
     });
     if (!pSessionRes.ok) {
