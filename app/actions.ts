@@ -452,7 +452,10 @@ export async function completeCheckoutFlowServer(
       headers,
       body: JSON.stringify({ 
         provider_id: targetProviderId,
-        data: paymentMethodId ? { payment_method_id: paymentMethodId } : undefined,
+        data: {
+          payment_method_id: paymentMethodId || undefined,
+          cart_id: cartId,
+        },
       }),
     });
     if (!pSessionRes.ok) {
